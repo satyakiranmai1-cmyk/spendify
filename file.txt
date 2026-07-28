@@ -1,0 +1,34 @@
+Add two links to the footer in @templates/base.html:
+
+-"Terms and Conditions"
+-"Privacy policy"
+
+both should be in plain text and no special styling is needed now
+
+Point both to "#" as plalceholder hrefs since the pages don't exist yet
+do not modify anything else on the pages 
+create a "Terms and Condtions" page fore spendify
+1. Add a new route in [@app.py(http://app.py/):]
+GET/terms -> renders templates/terms.html
+2.Create templates/terms.html with generic terms and conditions content appropriate for a personal expenses tracking app.
+Include sections like: "Acceptance of Terms", Use of service, User data, Limitations of liability and change of service.
+Extend base.html if it exists other wise match the style of landing.html
+3.In templates/landing.html , update the "Terms and Condtions " footer link from href to "/Terms"
+
+do not modify anything else on the pages 
+create a "Terms and Condtions" page fore spendify
+1. Add a new route in [@app.py(http://app.py/):]
+GET/terms -> renders templates/Privacy.html
+2.Create templates/Privacy.html with generic terms and conditions content appropriate for a personal expenses tracking app.
+Include sections like: Privacy terms , User data, Limitations of liability and change of service.
+Extend base.html if it exists other wise match the style of landing.html
+3.In templates/landing.html , update the "Terms and Condtions " footer link from href to "/Privacy"
+
+Add model to @templates/landing.html that opens when the user clicks "See how it works"
+-Clicking "See how it works" opens a modal overlay
+-Modal contains an embedded YouTube video (use any placenolder YourTube url now, I will replace it later)
+-video should be played inside the modal 
+-clicking the close button OR clicking outside the modal closes it
+-when the modal closes the video should stop and should not be played in background 
+- no page libraries or dependancies- vanilla JS only since we are not using any JS framework inthis project
+- do not modify any other part of the project
