@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "Bash(git -C /Users/satyam/Desktop/expense-tracker add -A)",
+      "Bash(git -C /Users/satyam/Desktop/expense-tracker status)"
+    ],
+    "ask": [
+      "WebSearch"
+    ]
+  }
+}
