@@ -1,9 +1,12 @@
-from flask import Flask, redirect, render_template, request, url_for
-from werkzeug.security import generate_password_hash
+from datetime import datetime
 
-from database.db import get_db, init_db, seed_db
+from flask import Flask, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from database.db import CATEGORIES, get_db, init_db, seed_db
 
 app = Flask(__name__)
+app.secret_key = "dev-secret-key"
 
 with app.app_context():
     init_db()
@@ -58,9 +61,26 @@ def register():
     return redirect(url_for("login"))
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if request.method == "GET":
+        return render_template("login.html")
+
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+
+    if not email or not password:
+        return render_template("login.html", error="All fields are required"), 400
+
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    db.close()
+
+    if not user or not check_password_hash(user["password"], password):
+        return render_template("login.html", error="Invalid email or password"), 401
+
+    session["user_id"] = user["id"]
+    return redirect(url_for("profile"))
 
 
 @app.route("/terms")
@@ -84,7 +104,52 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    if not user:
+        db.close()
+        session.clear()
+        return redirect(url_for("login"))
+
+    summary = db.execute(
+        "SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count "
+        "FROM expenses WHERE user_id = ?",
+        (user_id,),
+    ).fetchone()
+    total_spent = summary["total"]
+    expense_count = summary["count"]
+
+    category_rows = db.execute(
+        "SELECT category, SUM(amount) AS total FROM expenses "
+        "WHERE user_id = ? GROUP BY category",
+        (user_id,),
+    ).fetchall()
+    db.close()
+
+    totals_by_category = {row["category"]: row["total"] for row in category_rows}
+    category_totals = [
+        (category, totals_by_category[category])
+        for category in CATEGORIES
+        if category in totals_by_category
+    ]
+
+    member_since = datetime.strptime(
+        user["created_at"], "%Y-%m-%d %H:%M:%S"
+    ).strftime("%B %d, %Y")
+
+    return render_template(
+        "profile.html",
+        user=user,
+        total_spent=total_spent,
+        expense_count=expense_count,
+        category_totals=category_totals,
+        member_since=member_since,
+    )
 
 
 @app.route("/expenses/add")
