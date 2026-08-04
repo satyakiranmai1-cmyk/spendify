@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Your profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="profile-container">
+
+        <div class="profile-header">
+            <h1 class="profile-name">{{ user.name }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+            <p class="profile-member-since">Member since {{ member_since }}</p>
+        </div>
+
+        <div class="profile-stats">
+            <div class="profile-stat-card">
+                <span class="profile-stat-label">Total spent</span>
+                <span class="profile-stat-value">₹{{ "%.2f"|format(total_spent) }}</span>
+            </div>
+            <div class="profile-stat-card">
+                <span class="profile-stat-label">Expenses logged</span>
+                <span class="profile-stat-value">{{ expense_count }}</span>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h2 class="profile-card-title">Spending by category</h2>
+            {% if category_totals %}
+            <div class="profile-bars">
+                {% for category, total in category_totals %}
+                <div class="profile-bar-row">
+                    <span class="profile-bar-label">{{ category }}</span>
+                    <div class="profile-bar-track">
+                        <div class="profile-bar-fill" style="width: {{ (total / total_spent * 100) if total_spent else 0 }}%"></div>
+                    </div>
+                    <span class="profile-bar-amount">₹{{ "%.2f"|format(total) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="profile-empty">No expenses yet.</p>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('logout') }}" class="profile-signout">Sign out</a>
+
+    </div>
+</section>
+
+{% endblock %}
